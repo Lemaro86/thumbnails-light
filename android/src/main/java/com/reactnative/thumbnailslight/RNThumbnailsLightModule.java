@@ -15,6 +15,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.module.annotations.ReactModule;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,7 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.EnumSet;
 
-public class RNThumbnailsLightManager extends ReactContextBaseJavaModule {
+@ReactModule(name = RNThumbnailsLightModule.MODULE_NAME)
+public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
+    public static final String MODULE_NAME = "RNThumbnailsLight";
     private static ReactApplicationContext reactContext;
     private static final String TAG = "ThumbnailsLight";
     private static final String ERROR_TAG = "E_VIDEO_THUMBNAILS";
@@ -44,7 +47,7 @@ public class RNThumbnailsLightManager extends ReactContextBaseJavaModule {
 //     EnumSet<Permission> getPathPermissions(reactContext context, String path);
 //   }
 
-    RNThumbnailsLightManager(ReactApplicationContext context) {
+    RNThumbnailsLightModule(ReactApplicationContext context) {
         super(context);
         reactContext = context;
     }
