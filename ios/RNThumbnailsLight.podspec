@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.author             = { "author" => "author@domain.cn" }
   s.platform     = :ios, "8.0"
   s.source       = { :git => "git@github.com:Lemaro86/thumbnails-light.git", :tag => "#{s.version}" }
-  s.source_files  = "ios/RNThumbnailsLight/*.{h,m}"
+  s.source_files  = "RNThumbnailsLight*.{h,m}"
   s.requires_arc = true
 
 

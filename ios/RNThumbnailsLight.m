@@ -1,4 +1,6 @@
-
+#import <AVFoundation/AVFoundation.h>
+#import <AVFoundation/AVAsset.h>
+#import <UIKit/UIKit.h>
 #import "RNThumbnailsLight.h"
 
 @implementation RNThumbnailsLight
@@ -14,7 +16,29 @@ static NSString* const OPTIONS_KEY_QUALITY = @"quality";
 static NSString* const OPTIONS_KEY_TIME = @"time";
 static NSString* const OPTIONS_KEY_HEADERS = @"headers";
 
-RCT_EXPORT_MODULE()
+- (BOOL)ensureDirExistsWithPath:(NSString *)path {
+  BOOL isDir = NO;
+  NSError *error;
+  BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
+  if (!(exists && isDir)) {
+      [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error];
+      if (error) {
+          return NO;
+      }
+  }
+  return YES;
+}
+
+- (NSString *)generatePathInDirectory:(NSString *)directory withExtension:(NSString *)extension {
+  NSString *fileName = [[[NSUUID UUID] UUIDString] stringByAppendingString:extension];
+  [self ensureDirExistsWithPath:directory];
+  return [directory stringByAppendingPathComponent:fileName];
+}
+
+- (NSString *)cacheDirectoryPath {
+  NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+  return array[0];
+}
 
 RCT_REMAP_METHOD(getThumbnail,
                     sourceFilename:(NSString *)source
@@ -31,7 +55,7 @@ RCT_REMAP_METHOD(getThumbnail,
 //       return reject(@"E_FILESYSTEM_PERMISSIONS", [NSString stringWithFormat:@"File '%@' isn't readable.", source], nil);
 //     }
   } else {
-    return reject(@"error type of file");
+      return reject(@"error type of file", @"There where no file", nil);
   }
 
   long timeInMs = [(NSNumber *)options[OPTIONS_KEY_TIME] integerValue] ?: 0;
@@ -42,6 +66,7 @@ RCT_REMAP_METHOD(getThumbnail,
   AVAssetImageGenerator *generator = [[AVAssetImageGenerator alloc] initWithAsset:asset];
   generator.appliesPreferredTrackTransform = YES;
 
+
   NSError *err = NULL;
   CMTime time = CMTimeMake(timeInMs, 1000);
 
@@ -51,32 +76,10 @@ RCT_REMAP_METHOD(getThumbnail,
   }
   UIImage *thumbnail = [UIImage imageWithCGImage:imgRef];
 
-  - (BOOL)ensureDirExistsWithPath:(NSString *)path {
-    BOOL isDir = NO;
-    NSError *error;
-    BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir];
-    if (!(exists && isDir)) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:path withIntermediateDirectories:YES attributes:nil error:&error];
-        if (error) {
-            return NO;
-        }
-    }
-    return YES;
-  }
 
-  - (NSString *)generatePathInDirectory:(NSString *)directory withExtension:(NSString *)extension {
-    NSString *fileName = [[[NSUUID UUID] UUIDString] stringByAppendingString:extension];
-    [self ensureDirExistsWithPath:directory];
-    return [directory stringByAppendingPathComponent:fileName];
-  }
-
-  - (NSString *)cacheDirectoryPath {
-    NSArray *array = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    return array[0];
-  }
 
   NSString *newPath = [self generatePathInDirectory:[[self cacheDirectoryPath] stringByAppendingPathComponent:@"VideoThumbnails"]
-                            withExtension:@".jpg";
+                            withExtension:@".jpg"];
 //   [_fileSystem ensureDirExistsWithPath:directory];
 
 //   NSString *fileName = [[[NSUUID UUID] UUIDString] stringByAppendingString:@".jpg"];
