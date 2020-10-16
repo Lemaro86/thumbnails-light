@@ -1,8 +1,5 @@
-package com.reactnative.thumbnailslight;
+package com.reactnative.rnthumbnailslight;
 
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContext;
-// import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -11,10 +8,12 @@ import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.widget.FrameLayout;
 
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.module.annotations.ReactModule;
 
 import java.io.File;
@@ -31,8 +30,9 @@ import java.util.EnumSet;
 
 @ReactModule(name = RNThumbnailsLightModule.MODULE_NAME)
 public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
+
     public static final String MODULE_NAME = "RNThumbnailsLight";
-    private static ReactApplicationContext reactContext;
+
     private static final String TAG = "ThumbnailsLight";
     private static final String ERROR_TAG = "E_VIDEO_THUMBNAILS";
     private static String ERR_COULD_NOT_GET_THUMBNAIL = "ERR_COULD_NOT_GET_THUMBNAIL";
@@ -40,6 +40,7 @@ public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
     private static final String KEY_QUALITY = "quality";
     private static final String KEY_TIME = "time";
     private static final String KEY_HEADERS = "headers";
+
 //   private enum Permission {
 //     READ, WRITE,
 //   }
@@ -47,14 +48,13 @@ public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
 //     EnumSet<Permission> getPathPermissions(reactContext context, String path);
 //   }
 
-    RNThumbnailsLightModule(ReactApplicationContext context) {
-        super(context);
-        reactContext = context;
+    RNThumbnailsLightModule(ReactApplicationContext reactContext) {
+        super(reactContext);
     }
 
     @Override
     public String getName() {
-        return TAG;
+      return MODULE_NAME;
     }
 
     private static class GetThumbnailAsyncTask extends AsyncTask<Void, Void, Bitmap> {
