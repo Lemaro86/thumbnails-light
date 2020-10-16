@@ -41,22 +41,23 @@ static NSString* const OPTIONS_KEY_HEADERS = @"headers";
 }
 
 RCT_REMAP_METHOD(getThumbnail,
-                    sourceFilename:(NSString *)source
-                    options:(NSDictionary *)options
-                    resolver:(RCTPromiseResolveBlock)resolve
-                    rejecter:(RCTPromiseRejectBlock)reject)
+                 sourceFilename:(NSString *)source
+                 options:(NSDictionary *)options
+                 resolver:(RCTPromiseResolveBlock)resolve
+                 rejecter:(RCTPromiseRejectBlock)reject)
 {
   NSURL *url = [NSURL URLWithString:source];
-  if ([url isFileURL]) {
+//  NSLog(@"source-------%@", source);
+//    check it late
+//  if ([url isFileURL]) {
 //     if (!_fileSystem) {
 //       return reject(@"E_MISSING_MODULE", @"No FileSystem module.", nil);
 //     }
 //     if (!([_fileSystem permissionsForURI:url] & UMFileSystemPermissionRead)) {
 //       return reject(@"E_FILESYSTEM_PERMISSIONS", [NSString stringWithFormat:@"File '%@' isn't readable.", source], nil);
 //     }
-  } else {
-      return reject(@"error type of file", @"There where no file", nil);
-  }
+//    return reject(@"error type of file", @"There where no file", nil);
+//  }
 
   long timeInMs = [(NSNumber *)options[OPTIONS_KEY_TIME] integerValue] ?: 0;
   float quality = [(NSNumber *)options[OPTIONS_KEY_QUALITY] floatValue] ?: 1.0;

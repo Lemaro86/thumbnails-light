@@ -1,6 +1,11 @@
-
 import { NativeModules } from 'react-native';
 
 const { RNThumbnailsLight } = NativeModules;
 
-export default RNThumbnailsLight;
+class ThumbnailsLight {
+    async getThumbnail(sourceFilename, time) {
+        return await RNThumbnailsLight.getThumbnail(sourceFilename, time);
+    }
+}
+
+export default ThumbnailsLight;
