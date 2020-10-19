@@ -1,12 +1,14 @@
-package com.reactnative.rnthumbnailslight;
+package com.lemaro.react;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.webkit.URLUtil;
 import android.widget.FrameLayout;
+import android.media.ThumbnailUtils;
+import android.provider.MediaStore;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -15,6 +17,8 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableMap;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,10 +27,6 @@ import java.io.OutputStream;
 
 import java.util.HashMap;
 import java.util.UUID;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.EnumSet;
 
 @ReactModule(name = RNThumbnailsLightModule.MODULE_NAME)
 public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
@@ -41,13 +41,6 @@ public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
     private static final String KEY_TIME = "time";
     private static final String KEY_HEADERS = "headers";
 
-//   private enum Permission {
-//     READ, WRITE,
-//   }
-//   private interface FilePermissionModuleInterface {
-//     EnumSet<Permission> getPathPermissions(reactContext context, String path);
-//   }
-
     RNThumbnailsLightModule(ReactApplicationContext reactContext) {
         super(reactContext);
     }
@@ -59,32 +52,22 @@ public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
 
     private static class GetThumbnailAsyncTask extends AsyncTask<Void, Void, Bitmap> {
         private String mSourceFilename;
-        private ReadableMap mVideoOptions;
         Exception mError;
 
-        @ReactMethod
-        GetThumbnailAsyncTask(String sourceFilename, ReadableMap videoOptions) {
+        GetThumbnailAsyncTask(String sourceFilename) {
             mSourceFilename = sourceFilename;
-            mVideoOptions = videoOptions;
         }
 
         @Override
         protected final Bitmap doInBackground(Void... voids) {
-            long time = mVideoOptions.hasKey(KEY_TIME) ? mVideoOptions.getInt(KEY_TIME) * 1000 : 0;
             MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            long time = 1000000;
             try {
-                if (URLUtil.isFileUrl(mSourceFilename)) {
-                    retriever.setDataSource(Uri.decode(mSourceFilename).replace("file://", ""));
-                } else {
-//           think about default map setDataSource(String uri, Map<String, String> headers) ?
-                    retriever.setDataSource(mSourceFilename);
-//           retriever.setDataSource(mSourceFilename, mVideoOptions.hasKey(KEY_HEADERS) ? mVideoOptions.getMap(KEY_HEADERS) : String(""));
-                }
-            } catch (RuntimeException e) {
+                retriever.setDataSource(mSourceFilename, new HashMap<String, String>());
+            } catch (Exception e) {
                 mError = e;
                 return null;
             }
-
             return retriever.getFrameAtTime(time, MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
         }
     }
@@ -103,27 +86,10 @@ public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
         return directory + File.separator + filename + (extension.startsWith(".") ? extension : "." + extension);
     }
 
-//   private boolean isAllowedToRead(String url) {
-//     if (mModuleRegistry != null) {
-//       FilePermissionModuleInterface permissionModuleInterface = mModuleRegistry.getModule(FilePermissionModuleInterface.class);
-//       if (permissionModuleInterface != null) {
-//         return permissionModuleInterface.getPathPermissions(getReactApplicationContext(), url).contains(Permission.READ);
-//       }
-//     }
-//     return true;
-//   }
-
-
-    //is it need here react method?
+    @ReactMethod
     public void getThumbnail(String sourceFilename, final ReadableMap videoOptions, final Promise promise) {
-        if (URLUtil.isFileUrl(sourceFilename)
-//     && !isAllowedToRead(Uri.decode(sourceFilename).replace("file://", ""))
-        ) {
-            promise.reject(ERROR_TAG, "Can't read file");
-            return;
-        }
 
-        GetThumbnailAsyncTask getThumbnailAsyncTask = new GetThumbnailAsyncTask(sourceFilename, videoOptions) {
+        GetThumbnailAsyncTask getThumbnailAsyncTask = new GetThumbnailAsyncTask(sourceFilename) {
             @Override
             protected void onPostExecute(Bitmap thumbnail) {
                 if (thumbnail == null || mError != null) {
@@ -137,15 +103,23 @@ public class RNThumbnailsLightModule extends ReactContextBaseJavaModule {
                 try {
                     String path = generateOutputPath(getReactApplicationContext().getCacheDir(), "VideoThumbnails", "jpg");
                     OutputStream outputStream = new FileOutputStream(path);
-                    thumbnail.compress(Bitmap.CompressFormat.JPEG, (int) (videoOptions.getDouble(KEY_QUALITY) * 100), outputStream);
+                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
                     outputStream.flush();
                     outputStream.close();
-                    Bundle response = new Bundle();
-                    response.putString("uri", Uri.fromFile(new File(path)).toString());
-                    response.putInt("width", thumbnail.getWidth());
-                    response.putInt("height", thumbnail.getHeight());
-                    promise.resolve(response);
-                } catch (IOException ex) {
+
+                    String imageUrl = Uri.fromFile(new File(path)).toString();
+
+//                     Bundle response = new Bundle();
+//                     response.putString("uri", imageUrl);
+//                     response.putInt("width", thumbnail.getWidth());
+//                     response.putInt("height", thumbnail.getHeight());
+
+                    WritableMap map = Arguments.createMap();
+                    map.putString("uri", imageUrl);
+
+                    promise.resolve(map);
+                } catch (Exception ex) {
+                    Log.e("E_RNThumnail_ERROR", ex.getMessage());
                     promise.reject(ERROR_TAG, ex);
                 }
             }

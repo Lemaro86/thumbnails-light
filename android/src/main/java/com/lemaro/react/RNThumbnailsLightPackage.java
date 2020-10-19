@@ -1,4 +1,4 @@
-package com.reactnative.rnthumbnailslight;
+package com.lemaro.react;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
