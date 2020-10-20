@@ -38,23 +38,24 @@ const VideoThumnails = ({ url }) => {
 
 	useEffect(() => {
 		if (!image) {
-			generateThumbnail();
+			getImageUrlFromVideo();
 		}
 	}, []);
 
 	const getImageUrlFromVideo = async () => {
-		try {
-			const thumbnailsLight = new ThumbnailsLight();
-			const { uri } = await thumbnailsLight.getThumbnail(url, { time: 5000 });
-			setImage(uri);
-		} catch (e) {
-			console.warn(e);
-		}
+		await getThumbnailAsync(url, { time: 5000 })
+            .then(res => {
+                setImage(res.uri);
+            })
+            .catch(e => {
+            	console.log(e);
+            });
+        setImage(uri);
 	};
 
     return (
-		<View>
-			{image ? (
+        <View>
+            {image ? (
                 <Image
                     source={{ uri: image }}
                     style={{ width: 100, height: 100 }}
