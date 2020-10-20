@@ -31,7 +31,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Image, View, Text } from 'react-native';
-import ThumbnailsLight from 'react-native-thumbnails-light';
+import { getThumbnailAsync } from 'react-native-thumbnails-light';
 
 const VideoThumnails = ({ url }) => {
 	const [image, setImage] = useState(null);
