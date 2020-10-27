@@ -1,4 +1,5 @@
 # react-native-thumbnails-light
+Library for generation image from video. For video source you can use url.
 
 ## Getting started
 
